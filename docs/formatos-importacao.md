@@ -125,3 +125,16 @@ Projetar `N-n` parcelas futuras de cada lançamento da última fatura reproduziu
 - O nome do arquivo ou do comprovante não identifica o tipo do imposto. Foi preciso perguntar ao usuário (INSS da babá vs. Simples da empresa), e a resposta vira regra por favorecido + faixa de valor.
 - Impostos de empresa pagos pelo casal entram numa categoria separada para não poluir o orçamento da casa.
 - Despesas anuais já conhecidas (IPVA em cotas, IPTU parcelado) devem aparecer na previsão dos meses em que vencem.
+
+## 12. Contrato de financiamento imobiliário (PDF do banco, "DDC")
+- Documento de **Demonstrativo Descritivo de Crédito**: cabeçalho com prazo total, prazo remanescente, taxa, sistema de amortização (SAC), data da última parcela.
+- Corpo: tabela corrida de **todas as parcelas, passadas e futuras**, com colunas: nº, vencimento, amortização, juros, índice, seguros (MIP, DFI, residencial), taxa de administração, situação (`Paga`, `Emitida`, `Projetada`) e valor total da parcela e saldo devedor.
+- O texto vem **sem quebra de linha entre as parcelas**: precisa de regex por linha lógica (`nº dd/mm/aaaa ... Situação valor saldo`).
+- A situação `Paga` / `Emitida` / `Projetada` diz o que já foi pago, o que está emitido e o que é estimativa. Usar isso diretamente na previsão: parcelas `Projetada` são previsão, e não compromisso certo.
+- Linhas `Operação: Pula parcela` indicam parcelas **puladas** (valor incorporado ao saldo devedor). Merecem alerta ao usuário, porque aumentam o saldo.
+- Parcela em SAC **cai todo mês**. O motor de previsão deve ler a tabela do contrato, e não repetir o último valor.
+
+## 13. Extrato Inter PJ (CSV)
+- Mesmo layout do extrato Inter PF. A conta é de pessoa jurídica (CNPJ do titular).
+- Entradas concentradas em poucos pagadores. O app pode destacar **concentração de renda** (percentual da renda que vem do maior pagador).
+- Pagamentos da empresa para a família (retirada, pró-labore) e da família para a empresa precisam ser tratados como transferência entre PF e PJ.
