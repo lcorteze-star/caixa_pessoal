@@ -99,3 +99,29 @@ Projetar `N-n` parcelas futuras de cada lançamento da última fatura reproduziu
 - A fatura de um cartão pode ser paga por contas diferentes a cada mês.
 - Pagamentos de despesa da casa feitos por uma PJ do casal precisam ser marcados (origem PJ) para não distorcer o orçamento da família.
 - Despesas anuais atrasadas ou concentradas (IPVA, IPTU, licenciamento, multas) precisam de categoria própria e opção "não recorrente" para não distorcer médias.
+
+## 10. Formatos do segundo lote
+
+### Extrato Inter (CSV)
+- Separador `;`, cabeçalho de 3 linhas (`Conta`, `Período`, `Saldo`), depois `Data Lançamento;Histórico;Descrição;Valor;Saldo`.
+- Valores no padrão BR (`-2.161,55`), datas `DD/MM/AAAA`, **ordem decrescente** (mais novo primeiro). Espaço sobrando no fim de `Histórico` (`Pix enviado `): aplicar trim.
+- A coluna `Saldo` permite conferir a transcrição: saldo final menos saldo inicial = soma dos lançamentos. Conferido sem diferença.
+- Tipos: Pix enviado/recebido, Compra no débito, Pagamento de Convênio (órgãos públicos), Pagamento de Título, Pagamento efetuado (fatura do cartão).
+- O mesmo extrato existe em PDF. Preferir o CSV e usar o PDF só como reserva.
+
+### Extrato BTG (XLS)
+- É um `.xls` antigo (gerado por JasperReports). Pandas precisa do `xlrd`. Cabeçalho nas primeiras 10 linhas, colunas esparsas e células mescladas: descartar colunas vazias.
+- Contém as linhas `Saldo Diário` misturadas aos lançamentos. Filtrar.
+- No app final, aceitar também XLSX, e orientar o usuário a baixar CSV quando o banco oferecer.
+
+### Guia de parcelamento de IPTU (PDF da Prefeitura)
+- A primeira parte traz o acordo (número de parcelas, valor total, dívidas incluídas). Depois vêm as guias, uma por parcela, cada uma com vencimento e valor.
+- **A parcela cresce todo mês**: `valor_base × (1 + 1% × (n−1))`. Não projetar parcela fixa. O motor de previsão precisa aceitar uma regra de reajuste.
+- O PDF não informa quais parcelas já foram pagas. Cruzar com os extratos.
+
+## 11. Regras de negócio novas
+- Uma pessoa jurídica do casal pode **pagar fatura de cartão e despesas pessoais** e também transferir valores para as contas da família. Marcar a origem (PF/PJ) e dar ao usuário a escolha de contar esses repasses como receita.
+- Transferências de ida e volta entre PJ e PF no mesmo mês (valor igual) se anulam e não são receita.
+- O nome do arquivo ou do comprovante não identifica o tipo do imposto. Foi preciso perguntar ao usuário (INSS da babá vs. Simples da empresa), e a resposta vira regra por favorecido + faixa de valor.
+- Impostos de empresa pagos pelo casal entram numa categoria separada para não poluir o orçamento da casa.
+- Despesas anuais já conhecidas (IPVA em cotas, IPTU parcelado) devem aparecer na previsão dos meses em que vencem.
