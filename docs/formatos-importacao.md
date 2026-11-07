@@ -65,3 +65,37 @@ Serve de especificação para os leitores (parsers) do app e para o briefing do 
 - Sobra uma fração significativa (≈ 1 em 5 linhas) para revisão humana: nomes de pessoas, lojas de nicho, razões sociais opacas.
 - Cada correção do usuário vira regra para os meses seguintes.
 - Normalizar acentos e caixa antes de comparar; atenção a espaços (`CASAS BAHIA` vs `CASASBAHIA`).
+
+## 7. Novos formatos (lote de 92 arquivos)
+
+### Fatura Riachuelo/Midway (PDF)
+- Texto extraível. Tabela `Data | Loja | Descrição | Valor original | Parcela (nn/nn) | Valor do mês`.
+- Compras parceladas trazem **data da compra original**. `PAGAMENTO` aparece como linha negativa (não é despesa).
+- A página 2 em diante é boleto/propaganda, e deve ser ignorada. Seção "Total a vencer" dá o saldo futuro das parcelas.
+- Pagamento feito por Pix aparece em outra conta (a do pagador), então a fatura isolada não diz de onde saiu o dinheiro.
+
+### Comprovantes (imagem)
+- A extração de texto de imagem funciona bem em comprovantes de banco. Modelos vistos: BTG (transferência, pagamento de boleto, pagamento de fatura), Inter (Pix enviado, pagamento de convênio/boleto, pagamento de fatura) e recibo de maquininha.
+- Campos comuns: valor, data/hora, favorecido (nome e CNPJ/CPF), pagador, instituição, ID/autenticação.
+- Boleto de órgão público (IPVA, IPTU, Detran, multa) identifica o órgão no "código de convênio" ou no nome do favorecido.
+- Pix para `Receita Federal` costuma ser imposto (DAS, INSS de empregado doméstico, renegociação). Perguntar ao usuário e lembrar.
+- **O nome do arquivo não é confiável** para mês/competência. Um arquivo chamado `…1026` tinha data de pagamento em 08/09. Usar sempre a data do documento.
+- O pagador do comprovante pode ser **outra conta ou pessoa jurídica** do mesmo casal. O app precisa permitir várias contas por pessoa, inclusive PJ.
+
+### Capturas de tela do app do banco (fatura em aberto)
+- Lista por dia, com tipo, estabelecimento, categoria do banco e valor. Ordem decrescente, em rolagem.
+- Capturas consecutivas **se sobrepõem** (o fim de uma repete o começo da outra). Deduplicar por data + estabelecimento + valor **somente entre capturas**, nunca dentro da mesma imagem.
+- Cabeçalho mostra o total da fatura aberta, a previsão das faturas futuras (parcelas já assumidas), vencimento e melhor dia de compra. São dados valiosos para conferência.
+- O OCR perde linhas e mistura colunas. Mostrar o total do app ao lado da soma lida, e exibir a diferença ao usuário.
+
+## 8. Conferência da previsão de parcelas
+
+Projetar `N-n` parcelas futuras de cada lançamento da última fatura reproduziu a previsão que BTG e Inter exibem no app, com diferença de centavos (R$ 0,15 a R$ 0,18) em 3 meses seguidos. Usar essa comparação como teste automático do motor de previsão.
+
+## 9. Modelo de contas: o que o app precisa suportar
+
+- Várias contas por pessoa, em bancos diferentes (BTG, Inter), incluindo conta de pessoa jurídica.
+- A mesma pessoa pode aparecer com **nomes diferentes** em contas distintas (nome civil vs. nome completo). Casar por CPF/CNPJ ou por regra do usuário.
+- A fatura de um cartão pode ser paga por contas diferentes a cada mês.
+- Pagamentos de despesa da casa feitos por uma PJ do casal precisam ser marcados (origem PJ) para não distorcer o orçamento da família.
+- Despesas anuais atrasadas ou concentradas (IPVA, IPTU, licenciamento, multas) precisam de categoria própria e opção "não recorrente" para não distorcer médias.
